@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Friend Finder</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, intitial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="/styles.css">
+    <link href="https://fonts.googleapis.com/css?family=Lilita+One|Open+Sans" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand logo" href="#">FriendFinder</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+
+            </div>
+    </nav>
+    <div class ="container-fluid">
+        <div class="row p0 text-center justify-content-center">
+            <div class="col-sm-6 names" id="names">
+                <div class="question1"><h4></h4></div>
+  
+                <div class="answer1div">
+                <form>
+  
+                </div>
+                <div class="question2"><h4></h4></div>
+                <div class="answer2div">
+                </div>
+              </form>
+            </div>
+            
+          <div class="col-sm-12">
+            <h1><div class="num"></h1></div>
+            <h4><div class= "question"></h4></div>
+          </div>
+        </div>
+        <div class="row selectorrow no-gutters text-center justify-content-center text-white">
+            
+        </div>
+        <div class="row justify-content-center">
+            <button type="button" class="btn-sm buttonsubmit btn-dark">Next</button>
+        </div>
+      </div>
+</body>
+
+<script type="text/javascript">
+    var questionnum = 0; 
+    var questionnumber =questionnum+1;
+    //update questionarr
+    var questionarr = ["I enjoy cooking", "I enjoy being active", "I enjoy reading", "Going to a festival sounds fun", "Going to the beach is a perfect day", "Going on a hike in the mountains is relaxing", "I like sushi", "I like beer", "I like tacos"]
+    var basicinfo = []
+    var answerarr=[];
+    showBasicInfoQ();
+    function showBasicInfoQ(){
+      $(".question").text("What's your name?");
+      $(".answer1div").append(' <div class="form-group"><input type="text" class="form-control" id="name" placeholder="Antonio"></div>');
+      //input field
+      collectdata();
+    };
+    function collectdata(){
+      $( ".buttonsubmit" ).on( "click.collectdata", function() {
+      var name = $("#name").val();
+      basicinfo.push(name);
+      if (surveystarted===false){
+            startsurvey();
+          }      
+      $( ".buttonsubmit" ).off(".collectdata");
+      });
+    }
+    
+    
+    var surveystarted = false;
+    function startsurvey(){
+      surveystarted=true;
+      $(".num").text("0" + questionnumber + ".");
+      $(".question").text(questionarr[questionnum]);
+      $(".selectorrow").html('');
+      $(".selectorrow").append('<div class="  border selector">1</div><div class="  border selector">2</div><div class=" border selector">3</div><div class="  border selector">4</div><div class="  border selector">5</div>');
+      bindSelector();
+      bindButton();
+    }
+      function bindSelector(){
+        $( ".selector" ).on( "click", function() {
+          $(this).addClass("selected");
+          var selectednum = $(".selected");
+          //make it so that only the last selected has a class. if user clicks one and then another, class is removed from first and added to second.
+          console.log(selectednum.length);
+          if (selectednum.length > 1){
+            $('.selected').eq(0).removeClass('selected');
+          }
+        });
+      }
+      function bindButton(){
+        $( ".buttonsubmit" ).on( "click", function() {
+          console.log("selected class: ", $(".selected"));
+          var answer = $(".selected").text().trim();
+          console.log("answer: ", answer)
+          answerarr.push(answer);
+          console.log(answerarr);
+          questionnum++;
+          questionnumber++;
+          if (questionnumber < questionarr.length ) {
+            console.log("nextquestion click handler");
+            nextquestion();
+          }
+          if (questionnumber === questionarr.length){
+            endsurvey();
+            
+          }
+        
+        });
+      }
+    
+    function nextquestion(){
+      $(".num").text("0" + questionnumber + ".");
+      $(".question").text(questionarr[questionnum]);
+      $('.selected').removeClass('selected');
+    }
+    function endsurvey(){
+      $(".num").text("Thanks! Your match is...");
+      $(".question").text("");
+      $(".buttonsubmit").hide(); 
+      $('.selector').hide();
+      //combine answerarr and basic info into 1 array
+      var friend = {
+        Name: basicinfo[0],
+        //photo: $('#photo').val().trim(),
+        scores: answerarr
+              };
+      console.log(friend);
+      //Add to friends list
+      var currentURL = window.location.origin;
+              $.post(currentURL + '/api/friends', friend, function(data) {
+                    // console.log('response = ' + JSON.stringify(data));
+              //show results.. do image later $("#matchimage").attr("src", data.matchImage);
+            $(".question").html(data.Name + " and " + data.dogMatchName + "!");
+                });
+          }
+      
+    
+    </script>
+    </html>
